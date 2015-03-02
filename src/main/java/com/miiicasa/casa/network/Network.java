@@ -1,8 +1,8 @@
 package com.miiicasa.casa.network;
 
 import com.miiicasa.Config;
-import com.miiicasa.casa.BuildConfig;
 import com.miiicasa.casa.exception.NetworkException;
+import com.miiicasa.casa.utils.Logger;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
@@ -93,7 +93,7 @@ public class Network {
             }
             result = response.body().string();
         } catch (IOException e) {
-            if (BuildConfig.DEBUG) {
+            if (Logger.isDebug()) {
                 e.printStackTrace();
             }
             throw new NetworkException(NetworkException.TYPE.NETWORK_ERROR);
