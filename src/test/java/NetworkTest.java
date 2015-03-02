@@ -1,5 +1,5 @@
-import com.miiicasa.casa_lib.exception.NetworkException;
-import com.miiicasa.casa_lib.network.Network;
+import com.miiicasa.casa.exception.NetworkException;
+import com.miiicasa.casa.network.Network;
 
 import org.junit.Test;
 

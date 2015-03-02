@@ -1,4 +1,4 @@
-package com.miiicasa.casa_lib.utils;
+package com.miiicasa.casa.utils;
 
 import android.util.Log;
 

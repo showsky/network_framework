@@ -1,4 +1,4 @@
-package com.miiicasa.casa_lib;
+package com.miiicasa.casa;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

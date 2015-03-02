@@ -1,4 +1,4 @@
-package com.miiicasa.casa_lib.network;
+package com.miiicasa.casa.network;
 
 import com.android.volley.toolbox.HurlStack;
 import com.squareup.okhttp.OkUrlFactory;

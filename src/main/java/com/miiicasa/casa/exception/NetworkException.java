@@ -1,4 +1,4 @@
-package com.miiicasa.casa_lib.exception;
+package com.miiicasa.casa.exception;
 
 /**
  * Created by showsky on 15/3/2.

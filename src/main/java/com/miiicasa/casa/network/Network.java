@@ -1,8 +1,8 @@
-package com.miiicasa.casa_lib.network;
+package com.miiicasa.casa.network;
 
 import com.miiicasa.Config;
-import com.miiicasa.casa_lib.BuildConfig;
-import com.miiicasa.casa_lib.exception.NetworkException;
+import com.miiicasa.casa.BuildConfig;
+import com.miiicasa.casa.exception.NetworkException;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;

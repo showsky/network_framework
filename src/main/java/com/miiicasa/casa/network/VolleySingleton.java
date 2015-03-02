@@ -1,4 +1,4 @@
-package com.miiicasa.casa_lib.network;
+package com.miiicasa.casa.network;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,7 +9,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.ImageLoader;
 import com.miiicasa.Config;
-import com.miiicasa.casa_lib.utils.Logger;
+import com.miiicasa.casa.utils.Logger;
 
 import java.io.File;
 
