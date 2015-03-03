@@ -105,9 +105,12 @@ public class Network {
         Request.Builder builder = getRequestBuilder(url);
         FormEncodingBuilder formBody = new FormEncodingBuilder();
         if (values != null) {
+            Logger.d(TAG, "Post url: %s param: %s", url, values.toString());
             for (NameValuePair value : values) {
                 formBody.add(value.getName(), value.getValue());
             }
+        } else {
+            Logger.d(TAG, "Post url: %s", url);
         }
         builder.post(formBody.build());
         return verify(builder.build());
@@ -115,16 +118,26 @@ public class Network {
 
     public String get(String url, List<NameValuePair> values) throws NetworkException {
         String urlPath = (values == null) ? url : url + "?" + URLEncodedUtils.format(values, HTTP.UTF_8);
+        Logger.d(TAG, "Get url: %s", urlPath);
         Request.Builder builder = getRequestBuilder(urlPath);
         return verify(builder.build());
+    }
+
+    public String get(String url) throws NetworkException {
+        return get(url, null);
     }
 
     public String postFile(String url, List<NameValuePair> values, File file) throws NetworkException {
         Request.Builder builder = getRequestBuilder(url);
         MultipartBuilder multipart = new MultipartBuilder();
         multipart.type(MultipartBuilder.FORM);
-        for (NameValuePair value : values) {
-            multipart.addFormDataPart(value.getName(), value.getValue());
+        if (values != null) {
+            Logger.d(TAG, "Post file url: %s param: %s", url, values.toString());
+            for (NameValuePair value : values) {
+                multipart.addFormDataPart(value.getName(), value.getValue());
+            }
+        } else {
+            Logger.d(TAG, "Post file url: %s", url);
         }
         multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
