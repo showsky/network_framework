@@ -3,6 +3,7 @@ package com.miiicasa.casa.thread;
 import com.miiicasa.casa.utils.Logger;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -52,12 +53,23 @@ public class Request {
                 @Override
                 public void run() {
                     try {
-                        listener.onSuccess(get());
-                    } catch (Exception e) {
+                        if (listener != null) {
+                            listener.onSuccess(get());
+                        }
+                    } catch (ExecutionException e) {
                         if (Logger.isDebug()) {
                             e.printStackTrace();
                         }
-                        listener.onFail(e);
+                        if (listener != null) {
+                            listener.onFail(e.getCause());
+                        }
+                    } catch (InterruptedException e) {
+                        if (Logger.isDebug()) {
+                            e.printStackTrace();
+                        }
+                        if (listener != null) {
+                            listener.onFail(e.getCause());
+                        }
                     }
                 }
             });

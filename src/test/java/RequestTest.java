@@ -12,13 +12,13 @@ public class RequestTest {
     public void jobTest() {
         Request.CasaTask a = Request.getInstance().submit("ok", new ThreadListener<String>() {
             @Override
-            public void onSuccess(String result) throws Exception {
+            public void onSuccess(String result) {
                 System.out.println("Result: " + result);
             }
 
             @Override
-            public void onFail(Exception exception) {
-                System.err.println(exception.getMessage());
+            public void onFail(Throwable e) {
+                System.err.println(e.getMessage());
             }
 
             @Override
@@ -39,13 +39,13 @@ public class RequestTest {
 
         Request.CasaTask b = Request.getInstance().submit("ok", new ThreadListener<String>() {
             @Override
-            public void onSuccess(String result) throws Exception {
+            public void onSuccess(String result) {
                 System.out.println("Result: " + result);
             }
 
             @Override
-            public void onFail(Exception exception) {
-                System.err.println(exception.getMessage());
+            public void onFail(Throwable e) {
+                System.err.println(e.getMessage());
             }
 
             @Override
@@ -62,13 +62,13 @@ public class RequestTest {
 
         Request.CasaTask c = Request.getInstance().submit("ok", new ThreadListener<String>() {
             @Override
-            public void onSuccess(String result) throws Exception {
+            public void onSuccess(String result) {
                 System.out.println("Result: " + result);
             }
 
             @Override
-            public void onFail(Exception exception) {
-                System.err.println(exception.getMessage());
+            public void onFail(Throwable e) {
+                System.err.println(e.getMessage());
             }
 
             @Override

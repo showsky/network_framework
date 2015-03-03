@@ -7,6 +7,6 @@ import java.util.concurrent.Callable;
  */
 public abstract class ThreadListener<T> implements Callable<T> {
 
-    public abstract void onSuccess(T result) throws Exception;
-    public abstract void onFail(Exception exception);
+    public abstract void onSuccess(T result);
+    public abstract void onFail(Throwable e);
 }
