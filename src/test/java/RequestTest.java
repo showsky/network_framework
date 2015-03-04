@@ -1,4 +1,4 @@
-import com.miiicasa.casa.thread.Request;
+import com.miiicasa.casa.thread.Run;
 import com.miiicasa.casa.thread.ThreadListener;
 
 import org.junit.Test;
@@ -10,7 +10,7 @@ public class RequestTest {
 
     @Test
     public void jobTest() {
-        Request.CasaTask a = Request.getInstance().submit("ok", new ThreadListener<String>() {
+        Run.CasaTask a = Run.getInstance().submit(new ThreadListener<String>() {
             @Override
             public void onSuccess(String result) {
                 System.out.println("Result: " + result);
@@ -37,7 +37,7 @@ public class RequestTest {
             }
         });
 
-        Request.CasaTask b = Request.getInstance().submit("ok", new ThreadListener<String>() {
+        Run.CasaTask b = Run.getInstance().submit(new ThreadListener<String>() {
             @Override
             public void onSuccess(String result) {
                 System.out.println("Result: " + result);
@@ -60,7 +60,7 @@ public class RequestTest {
             }
         });
 
-        Request.CasaTask c = Request.getInstance().submit("ok", new ThreadListener<String>() {
+        Run.CasaTask c = Run.getInstance().submit(new ThreadListener<String>() {
             @Override
             public void onSuccess(String result) {
                 System.out.println("Result: " + result);

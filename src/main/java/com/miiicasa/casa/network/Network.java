@@ -2,7 +2,9 @@ package com.miiicasa.casa.network;
 
 import com.miiicasa.Config;
 import com.miiicasa.casa.exception.NetworkException;
+import com.miiicasa.casa.thread.Run;
 import com.miiicasa.casa.utils.Logger;
+import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
@@ -17,9 +19,13 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,6 +52,7 @@ public class Network {
             TimeUnit.SECONDS
         );
         okHttpClient.setFollowRedirects(true);
+        okHttpClient.setDispatcher(new Dispatcher(Run.getInstance().getThreadPoolExecutor()));
         if (Config.PROXY) {
             okHttpClient.setProxy(
                 new Proxy(
@@ -54,6 +61,10 @@ public class Network {
                 )
             );
         }
+    }
+
+    public void cancel(String TAG) {
+        okHttpClient.cancel(TAG);
     }
 
     public Network setUserAgent(String userAgent) {
@@ -89,7 +100,7 @@ public class Network {
         try {
             Response response = okHttpClient.newCall(request).execute();
             if ( ! response.isSuccessful()) {
-                throw new NetworkException(NetworkException.TYPE.SERVER_ERROR);
+                throw new NetworkException(NetworkException.TYPE.SERVER_ERROR, response.code());
             }
             result = response.body().string();
         } catch (IOException e) {
@@ -116,6 +127,28 @@ public class Network {
         return verify(builder.build());
     }
 
+    public String post(String url, Map<String, String> values) throws NetworkException {
+        return post(url, values, null);
+    }
+
+    public String post(String url, Map<String, String> values, String TAG) throws NetworkException {
+        Request.Builder builder = getRequestBuilder(url);
+        FormEncodingBuilder formBody = new FormEncodingBuilder();
+        if (values != null) {
+            Logger.d(TAG, "Post url: %s param: %s", url, values.toString());
+            for (Map.Entry<String, String> entry : values.entrySet()) {
+                formBody.add(entry.getKey(), entry.getValue());
+            }
+        } else {
+            Logger.d(TAG, "Post url: %s", url);
+        }
+        builder.post(formBody.build());
+        if (TAG != null) {
+            builder.tag(TAG);
+        }
+        return verify(builder.build());
+    }
+
     public String get(String url, List<NameValuePair> values) throws NetworkException {
         String urlPath = (values == null) ? url : url + "?" + URLEncodedUtils.format(values, HTTP.UTF_8);
         Logger.d(TAG, "Get url: %s", urlPath);
@@ -123,11 +156,29 @@ public class Network {
         return verify(builder.build());
     }
 
-    public String get(String url) throws NetworkException {
-        return get(url, null);
+    public String get(String url, Map<String, String> values, String TAG) throws NetworkException {
+        String urlPath = (values == null) ? url : url + "?" + queryEncode(values);
+        Logger.d(TAG, "Get url: %s", urlPath);
+        Request.Builder builder = getRequestBuilder(urlPath);
+        if (TAG != null) {
+            builder.tag(TAG);
+        }
+        return verify(builder.build());
     }
 
-    public String postFile(String url, List<NameValuePair> values, File file) throws NetworkException {
+    public String get(String url, Map<String, String> values) throws NetworkException {
+        return get(url, values, null);
+    }
+
+    public String get(String url, String TAG) throws NetworkException {
+        return get(url, new HashMap<String, String>(), TAG);
+    }
+
+    public String get(String url) throws NetworkException {
+        return get(url, new HashMap<String, String>(), null);
+    }
+
+    public String postFile(String url, List<NameValuePair> values, File file, String TAG) throws NetworkException {
         Request.Builder builder = getRequestBuilder(url);
         MultipartBuilder multipart = new MultipartBuilder();
         multipart.type(MultipartBuilder.FORM);
@@ -141,6 +192,39 @@ public class Network {
         }
         multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
+        builder.tag(TAG);
         return verify(builder.build());
+    }
+
+    public String postFile(String url, Map<String, String> values, File file) throws NetworkException {
+        Request.Builder builder = getRequestBuilder(url);
+        MultipartBuilder multipart = new MultipartBuilder();
+        multipart.type(MultipartBuilder.FORM);
+        if (values != null) {
+            Logger.d(TAG, "Post file url: %s param: %s", url, values.toString());
+            for (Map.Entry<String, String> entry : values.entrySet()) {
+                multipart.addFormDataPart(entry.getKey(), entry.getValue());
+            }
+        } else {
+            Logger.d(TAG, "Post file url: %s", url);
+        }
+        multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
+        builder.post(multipart.build());
+        return verify(builder.build());
+    }
+
+    public static String queryEncode(Map<String, String> values) {
+        StringBuilder query = new StringBuilder();
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            try {
+                query.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                query.append("=");
+                query.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+                query.append("&");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return query.substring(0, query.length() - 1);
     }
 }

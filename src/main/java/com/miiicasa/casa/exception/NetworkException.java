@@ -15,10 +15,17 @@ public class NetworkException extends Exception {
         "Server error",
     };
     private TYPE type = null;
+    private int statusCode = 0;
 
     public NetworkException(TYPE type) {
         super(message[type.ordinal()]);
         this.type = type;
+    }
+
+    public NetworkException(TYPE type, int statusCode) {
+        super(message[type.ordinal()] + "Status code: " + statusCode);
+        this.type = type;
+        this.statusCode = statusCode;
     }
 
     public NetworkException(TYPE type, String message) {
@@ -28,5 +35,9 @@ public class NetworkException extends Exception {
 
     public TYPE getType() {
         return type;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }

@@ -17,4 +17,8 @@ public class Config {
 
     public static final boolean RETRY_NETWORK = true;
     public static final int RETRY_MAX = 2;
+
+    public final static int THREAD_POOL_SIZE = 3;
+    public final static int THREAD_POOL_MAX_SZIE = 5;
+    public final static int THREAD_KEEP_ALIVE_TIME = 10;
 }
