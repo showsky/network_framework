@@ -6,7 +6,7 @@ import org.junit.Test;
 /**
  * Created by showsky on 15/3/3.
  */
-public class RequestTest {
+public class RunTest {
 
     @Test
     public void jobTest() {
