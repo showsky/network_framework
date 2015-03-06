@@ -1,8 +1,10 @@
 import com.miiicasa.casa.exception.NetworkException;
 import com.miiicasa.casa.network.Network;
+import com.squareup.okhttp.MediaType;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,23 @@ public class NetworkTest {
         values.put("address", "电 脑");
         try {
             String response = Network.getInstance().post(TEST_URL, values);
+            System.out.println(response);
+        } catch (NetworkException networkExcpetion) {
+            networkExcpetion.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testPostFile() {
+        Map<String, String> values = new HashMap<>();
+        values.put("name", "ting_cheng");
+        values.put("email", "ting_cheng@miiicasa.com");
+        values.put("address", "电 脑");
+
+        File file = new File(getClass().getResource("/values/arrays.xml").getPath());
+        System.out.println(file.exists());
+        try {
+            String response = Network.getInstance().postFile(TEST_URL, values, file, MediaType.parse("text/xml"));
             System.out.println(response);
         } catch (NetworkException networkExcpetion) {
             networkExcpetion.printStackTrace();

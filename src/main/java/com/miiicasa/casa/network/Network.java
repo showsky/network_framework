@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class Network {
 
     private final static String TAG = Network.class.getSimpleName();
+    private final static String POST_FILENAME = "file";
     private final static MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
     private final static String ACCEPT_LANGUAGE = "Accept-Language";
     private String userAgent = Config.NETWORK_DEFAULT_USER_AGENT;
@@ -205,7 +206,7 @@ public class Network {
         } else {
             Logger.d(TAG, "Post file url: %s", url);
         }
-        multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
+        multipart.addFormDataPart(POST_FILENAME, POST_FILENAME, RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
         return verify(builder.build());
     }
