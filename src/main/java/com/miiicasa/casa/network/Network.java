@@ -2,9 +2,7 @@ package com.miiicasa.casa.network;
 
 import com.miiicasa.Config;
 import com.miiicasa.casa.exception.NetworkException;
-import com.miiicasa.casa.thread.Run;
 import com.miiicasa.casa.utils.Logger;
-import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
@@ -52,7 +50,6 @@ public class Network {
             TimeUnit.SECONDS
         );
         okHttpClient.setFollowRedirects(true);
-        okHttpClient.setDispatcher(new Dispatcher(Run.getInstance().getThreadPoolExecutor()));
         if (Config.PROXY) {
             okHttpClient.setProxy(
                 new Proxy(
