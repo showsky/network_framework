@@ -155,7 +155,7 @@ public class Network {
     }
 
     public String get(String url, Map<String, String> values, String TAG) throws NetworkException {
-        String urlPath = (values == null) ? url : url + "?" + queryEncode(values);
+        String urlPath = (values == null || values.size() == 0) ? url : url + "?" + queryEncode(values);
         Logger.d(TAG, "Get url: %s", urlPath);
         Request.Builder builder = getRequestBuilder(urlPath);
         if (TAG != null) {
