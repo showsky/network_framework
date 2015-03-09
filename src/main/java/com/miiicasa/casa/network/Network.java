@@ -190,7 +190,9 @@ public class Network {
         }
         multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
-        builder.tag(TAG);
+        if (TAG != null) {
+            builder.tag(TAG);
+        }
         return verify(builder.build());
     }
 
