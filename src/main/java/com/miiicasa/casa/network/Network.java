@@ -3,6 +3,7 @@ package com.miiicasa.casa.network;
 import com.miiicasa.Config;
 import com.miiicasa.casa.exception.NetworkException;
 import com.miiicasa.casa.utils.Logger;
+import com.miiicasa.casa.utils.NetworkUtils;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
@@ -17,14 +18,25 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Created by showsky on 15/3/2.
@@ -37,7 +49,7 @@ public class Network {
     private final static String ACCEPT_LANGUAGE = "Accept-Language";
     private String userAgent = Config.NETWORK_DEFAULT_USER_AGENT;
     private String acceptLanguage = null;
-    private OkHttpClient okHttpClient;
+    private OkHttpClient okHttpClient = null;
 
     private static class LazyHolder {
 
@@ -59,6 +71,15 @@ public class Network {
                 )
             );
         }
+        if (Config.USE_SSL) {
+            try {
+                okHttpClient.setSslSocketFactory(NetworkUtils.getSSLSocketFactory());
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void cancel(String TAG) {
@@ -77,6 +98,29 @@ public class Network {
 
     public static Network getInstance() {
         return LazyHolder.INSTANCE;
+    }
+
+    public void initSsl(InputStream inputStream) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        Certificate ca = cf.generateCertificate(inputStream);
+        inputStream.close();
+
+        // Create a KeyStore containing our trusted CAs
+        String keyStoreType = KeyStore.getDefaultType();
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        keyStore.load(null, null);
+        keyStore.setCertificateEntry("ca", ca);
+
+        // Create a TrustManager that trusts the CAs in our KeyStore
+        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+        tmf.init(keyStore);
+
+        // Create an SSLContext that uses our TrustManager
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, tmf.getTrustManagers(), null);
+
+        okHttpClient.setSslSocketFactory(context.getSocketFactory());
     }
 
     public OkHttpClient getOkHttpClient() {

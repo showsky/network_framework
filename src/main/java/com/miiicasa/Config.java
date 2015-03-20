@@ -10,6 +10,7 @@ public class Config {
 
     public final static String NETWORK_DEFAULT_USER_AGENT = "miiicasa";
     public final static int NETWORK_CONNECT_TIMEOUT_SECOND = 20;
+    public final static boolean USE_SSL = false;
 
     public static final boolean PROXY = false;
     public static final String PROXY_IP = "192.168.0.100";
