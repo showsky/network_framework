@@ -173,7 +173,7 @@ public class Network {
         return post(url, values, null);
     }
 
-    public String post(String url, Map<String, String> values, String TAG) throws NetworkException {
+    public String post(String url, Map<String, String> values, String id) throws NetworkException {
         Request.Builder builder = getRequestBuilder(url);
         FormEncodingBuilder formBody = new FormEncodingBuilder();
         if (values != null) {
@@ -185,8 +185,8 @@ public class Network {
             Logger.d(TAG, "Post url: %s", url);
         }
         builder.post(formBody.build());
-        if (TAG != null) {
-            builder.tag(TAG);
+        if (id != null) {
+            builder.tag(id);
         }
         return verify(builder.build());
     }
@@ -198,12 +198,12 @@ public class Network {
         return verify(builder.build());
     }
 
-    public String get(String url, Map<String, String> values, String TAG) throws NetworkException {
+    public String get(String url, Map<String, String> values, String id) throws NetworkException {
         String urlPath = (values == null || values.size() == 0) ? url : url + "?" + queryEncode(values);
         Logger.d(TAG, "Get url: %s", urlPath);
         Request.Builder builder = getRequestBuilder(urlPath);
-        if (TAG != null) {
-            builder.tag(TAG);
+        if (id != null) {
+            builder.tag(id);
         }
         return verify(builder.build());
     }
@@ -212,15 +212,15 @@ public class Network {
         return get(url, values, null);
     }
 
-    public String get(String url, String TAG) throws NetworkException {
-        return get(url, new HashMap<String, String>(), TAG);
+    public String get(String url, String id) throws NetworkException {
+        return get(url, new HashMap<String, String>(), id);
     }
 
     public String get(String url) throws NetworkException {
         return get(url, new HashMap<String, String>(), null);
     }
 
-    public String postFile(String url, List<NameValuePair> values, File file, String TAG) throws NetworkException {
+    public String postFile(String url, List<NameValuePair> values, File file, String id) throws NetworkException {
         Request.Builder builder = getRequestBuilder(url);
         MultipartBuilder multipart = new MultipartBuilder();
         multipart.type(MultipartBuilder.FORM);
@@ -234,8 +234,8 @@ public class Network {
         }
         multipart.addPart(RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
-        if (TAG != null) {
-            builder.tag(TAG);
+        if (id != null) {
+            builder.tag(id);
         }
         return verify(builder.build());
     }
