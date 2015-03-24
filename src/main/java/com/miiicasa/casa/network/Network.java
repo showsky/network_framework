@@ -240,7 +240,7 @@ public class Network {
         return verify(builder.build());
     }
 
-    public String postFile(String url, Map<String, String> values, File file) throws NetworkException {
+    public String postFile(String url, Map<String, String> values, File file, MediaType mediaType) throws NetworkException {
         Request.Builder builder = getRequestBuilder(url);
         MultipartBuilder multipart = new MultipartBuilder();
         multipart.type(MultipartBuilder.FORM);
@@ -252,9 +252,17 @@ public class Network {
         } else {
             Logger.d(TAG, "Post file url: %s", url);
         }
-        multipart.addFormDataPart(POST_FILENAME, POST_FILENAME, RequestBody.create(MEDIA_TYPE_JPG, file));
+        if (mediaType == null) {
+            multipart.addFormDataPart(POST_FILENAME, POST_FILENAME, RequestBody.create(MEDIA_TYPE_JPG, file));
+        } else {
+            multipart.addFormDataPart(POST_FILENAME, POST_FILENAME, RequestBody.create(mediaType, file));
+        }
         builder.post(multipart.build());
         return verify(builder.build());
+    }
+
+    public String postFile(String url, Map<String, String> values, File file) throws NetworkException {
+        return postFile(url, values, file, null);
     }
 
     public static String queryEncode(Map<String, String> values) {
