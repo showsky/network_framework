@@ -7,7 +7,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -73,14 +72,7 @@ public class Run {
             Config.THREAD_KEEP_ALIVE_TIME,
             KEEP_ALIVE_TIME_UNIT,
             workQueue,
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
-                    thread.setDaemon(false);
-                    return thread;
-                }
-            }
+            new PriorityThreadFactory().setPriority(Thread.MIN_PRIORITY)
         );
     }
 
