@@ -20,8 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -48,6 +52,7 @@ public class Network {
     private final static MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
     private final static String ACCEPT_LANGUAGE = "Accept-Language";
     private String userAgent = Config.NETWORK_DEFAULT_USER_AGENT;
+    private CookieManager cookieManager = null;
     private String acceptLanguage = null;
     private OkHttpClient okHttpClient = null;
 
@@ -70,6 +75,22 @@ public class Network {
                     new InetSocketAddress(Config.PROXY_IP, Config.PROXY_PORT)
                 )
             );
+        }
+        okHttpClient.setCookieHandler(new CookieHandler() {
+            @Override
+            public Map<String, List<String>> get(URI uri, Map<String, List<String>> requestHeaders) throws IOException {
+                return null;
+            }
+
+            @Override
+            public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
+
+            }
+        });
+        if (Config.USE_PERSISTENT_COOKIE) {
+            cookieManager = new CookieManager();
+            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+            okHttpClient.setCookieHandler(cookieManager);
         }
         if (Config.USE_SSL) {
             try {
@@ -98,6 +119,10 @@ public class Network {
 
     public static Network getInstance() {
         return LazyHolder.INSTANCE;
+    }
+
+    public CookieManager getCookieManager() {
+        return cookieManager;
     }
 
     public void initSsl(InputStream inputStream) throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
