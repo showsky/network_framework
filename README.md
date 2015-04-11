@@ -76,6 +76,8 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         }
     }
 
@@ -104,6 +106,8 @@ public class Config {
 
     public final static String NETWORK_DEFAULT_USER_AGENT = "miiicasa";
     public final static int NETWORK_CONNECT_TIMEOUT_SECOND = 20;
+    public final static boolean USE_PERSISTENT_COOKIE = true;
+    public final static boolean USE_SSL = false;
 
     public static final boolean PROXY = false;
     public static final String PROXY_IP = "192.168.0.100";
@@ -130,6 +134,25 @@ ext {
 }
 
 ...
+```
+
+* ProGuard rules
+
+```
+# okhttp
+-dontwarn com.squareup.**
+-keep class com.squareup.** { *; }
+
+# Gson uses generic type information stored in a class file when working with fields. Proguard
+# removes such information by default, so configure it to keep all of it.
+-keepattributes Signature
+
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
+
+# Gson specific classes
+-keep class sun.misc.Unsafe { *; }
+#-keep class com.google.gson.stream.** { *; }
 ```
 
 * Logger
