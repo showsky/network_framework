@@ -257,7 +257,7 @@ public class Network {
         } else {
             Logger.d(TAG, "Post file url: %s", url);
         }
-        multipart.addFormDataPart(POST_FILENAME, POST_FILENAME, RequestBody.create(MEDIA_TYPE_JPG, file));
+        multipart.addFormDataPart(POST_FILENAME, file.getName(), RequestBody.create(MEDIA_TYPE_JPG, file));
         builder.post(multipart.build());
         if (id != null) {
             builder.tag(id);
