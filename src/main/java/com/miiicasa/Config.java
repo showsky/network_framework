@@ -9,7 +9,7 @@ public class Config {
     public final static int MEMORY_CACHE_SIZE = 30;
 
     public final static String NETWORK_DEFAULT_USER_AGENT = "miiicasa";
-    public final static int NETWORK_CONNECT_TIMEOUT_SECOND = 20;
+    public final static int NETWORK_CONNECT_TIMEOUT_SECOND = 10;
     public final static boolean USE_PERSISTENT_COOKIE = true;
     public final static boolean USE_SSL = false;
 
@@ -23,4 +23,7 @@ public class Config {
     public final static int THREAD_POOL_SIZE = 3;
     public final static int THREAD_POOL_MAX_SZIE = 5;
     public final static int THREAD_KEEP_ALIVE_TIME = 60;
+
+    public static final boolean IS_DEBUG = true;
+    public static final String DEBUG_KEY = "miii";
 }
