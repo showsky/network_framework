@@ -17,15 +17,22 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.protocol.HTTP;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.io.UnsupportedEncodingException;
-import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -34,6 +41,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +56,7 @@ import javax.net.ssl.TrustManagerFactory;
 public class Network {
 
     private final static String TAG = Network.class.getSimpleName();
+    private final static String COOKIE_FILENAME = "session";
     private final static String POST_FILENAME = "file";
     private final static MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
     private final static String ACCEPT_LANGUAGE = "Accept-Language";
@@ -76,17 +85,6 @@ public class Network {
                 )
             );
         }
-        okHttpClient.setCookieHandler(new CookieHandler() {
-            @Override
-            public Map<String, List<String>> get(URI uri, Map<String, List<String>> requestHeaders) throws IOException {
-                return null;
-            }
-
-            @Override
-            public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
-
-            }
-        });
         if (Config.USE_PERSISTENT_COOKIE) {
             cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
@@ -96,9 +94,148 @@ public class Network {
             try {
                 okHttpClient.setSslSocketFactory(NetworkUtils.getSSLSocketFactory());
             } catch (KeyManagementException e) {
-                e.printStackTrace();
+                if (Logger.isDebug()) {
+                    e.printStackTrace();
+                }
             } catch (NoSuchAlgorithmException e) {
+                if (Logger.isDebug()) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void saveCookie(File path) {
+        File file = new File(path, COOKIE_FILENAME);
+        Logger.d(TAG, "Save cookie path: %s", file.getAbsolutePath());
+        if ( ! file.getParentFile().exists()) {
+            file.mkdirs();
+        }
+        ObjectOutputStream out = null;
+        try {
+            if (cookieManager != null && cookieManager.getCookieStore() != null) {
+                FileOutputStream fileOut = new FileOutputStream(file);
+                out = new ObjectOutputStream(fileOut);
+                ArrayList<CookieValues> cookies = new ArrayList<>(cookieManager.getCookieStore().getCookies().size());
+                for (HttpCookie httpCookie : cookieManager.getCookieStore().getCookies()) {
+                    CookieValues cookieValues = new CookieValues();
+                    cookieValues.name = httpCookie.getName();
+                    cookieValues.value = httpCookie.getValue();
+                    cookieValues.comment = httpCookie.getComment();
+                    cookieValues.commentUrl = httpCookie.getCommentURL();
+                    cookieValues.domain = httpCookie.getDomain();
+                    cookieValues.maxAge = httpCookie.getMaxAge();
+                    cookieValues.path = httpCookie.getPath();
+                    cookieValues.protlist = httpCookie.getPortlist();
+                    cookieValues.version = httpCookie.getVersion();
+                    cookieValues.secure = httpCookie.getSecure();
+                    cookieValues.discard = httpCookie.getDiscard();
+
+                    cookies.add(cookieValues);
+                    Logger.d(TAG, "cookie name: %s value: %s", cookieValues.name, cookieValues.value);
+                }
+                out.writeObject(cookies);
+                out.flush();
+            }
+        } catch (FileNotFoundException e) {
+            if (Logger.isDebug()) {
                 e.printStackTrace();
+            }
+        } catch (IOException e) {
+            if (Logger.isDebug()) {
+                e.printStackTrace();
+            }
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    if (Logger.isDebug()) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean loadCookie(File path) {
+        File file = new File(path, COOKIE_FILENAME);
+        if ( ! file.getParentFile().exists()) {
+            return false;
+        }
+        ObjectInputStream out = null;
+        try {
+            if (cookieManager != null && cookieManager.getCookieStore() != null) {
+                FileInputStream fileIn = new FileInputStream(file);
+                out = new ObjectInputStream(fileIn);
+                ArrayList<CookieValues> data = (ArrayList<CookieValues>) out.readObject();
+                if (data.size() == 0) {
+                    return false;
+                }
+
+                for (CookieValues cookieValues : data) {
+                    HttpCookie httpCookie = new HttpCookie(cookieValues.name, cookieValues.value);
+                    httpCookie.setComment(cookieValues.comment);
+                    httpCookie.setCommentURL(cookieValues.commentUrl);
+                    httpCookie.setDomain(cookieValues.domain);
+                    httpCookie.setMaxAge(cookieValues.maxAge);
+                    httpCookie.setPath(cookieValues.path);
+                    httpCookie.setPortlist(cookieValues.protlist);
+                    httpCookie.setVersion(cookieValues.version);
+                    httpCookie.setSecure(cookieValues.secure);
+                    httpCookie.setDiscard(cookieValues.discard);
+
+                    cookieManager.getCookieStore().removeAll();
+                    if ( ! httpCookie.hasExpired()) {
+                        try {
+                            Logger.d(TAG, "Load cookie name: %s value: %s", cookieValues.name, cookieValues.value);
+                            cookieManager.getCookieStore().add(
+                                new URI(httpCookie.getPath()),
+                                httpCookie
+                            );
+                        } catch (URISyntaxException e) {
+                            if (Logger.isDebug()) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else {
+                        file.delete();
+                        Logger.w(TAG, "Cookie expired");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        } catch (FileNotFoundException e) {
+            if (Logger.isDebug()) {
+                e.printStackTrace();
+            }
+            return false;
+        } catch (StreamCorruptedException e) {
+            if (Logger.isDebug()) {
+                e.printStackTrace();
+            }
+            return false;
+        } catch (IOException e) {
+            if (Logger.isDebug()) {
+                e.printStackTrace();
+            }
+            return false;
+        } catch (ClassNotFoundException e) {
+            if (Logger.isDebug()) {
+                e.printStackTrace();
+            }
+            return false;
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    if (Logger.isDebug()) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
