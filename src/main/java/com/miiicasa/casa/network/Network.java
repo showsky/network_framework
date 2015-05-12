@@ -160,6 +160,7 @@ public class Network {
 
     public boolean loadCookie(File path) {
         File file = new File(path, COOKIE_FILENAME);
+        Logger.d(TAG, "Load cookie path: %s", file.getAbsolutePath());
         if ( ! file.getParentFile().exists()) {
             return false;
         }
@@ -238,6 +239,12 @@ public class Network {
                 }
             }
         }
+    }
+
+    public void deleteSessionFile(File path) {
+        File file = new File(path, COOKIE_FILENAME);
+        Logger.d(TAG, "Delete cookie path: %s", file.getAbsolutePath());
+        file.delete();
     }
 
     public void cancel(String TAG) {
